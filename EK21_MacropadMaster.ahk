@@ -5,53 +5,51 @@
 ; ##########################################
 ; ##########################################
 
+global margin := 7
+global taskbarHeight := 40
 #Requires AutoHotkey v2.0
 InstallKeybdHook
 SetTitleMatchMode 2
 #UseHook
 
-; --- DEFINES ---
-global margin := 7
-global taskbarHeight := 40
-
 ; ##########################################
-; HUD SYSTEM - COMPACT DYNAMIC VERSION
+; HUD SYSTEM - OCD PRECISION EDITION (v2.4)
 ; ##########################################
 
 ; --- HUD INIT ---
 global HUD := Gui("+AlwaysOnTop -Caption +ToolWindow")
 HUD.SetFont("s12 w700 cWhite", "Bahnschrift")
-; Initialize with Center alignment and no word wrap
 global HUDText := HUD.Add("Text", "Center -Wrap", "") 
 global isFlashing := false
-global padding := 60 ; Horizontal breathing room for text
+global padding := 60 ; Perfect horizontal balance
 
 UpdateHUD(txt, color) {
     global HUD, HUDText, padding
     
     ; 1. VIRTUAL MEASUREMENT
+    ; Bypass v2 sizing cache by measuring text in a temporary GUI
     tempGui := Gui()
     tempGui.SetFont("s12 w700", "Bahnschrift")
     tempText := tempGui.Add("Text", "", txt)
     tempText.GetPos(,, &tw)
     tempGui.Destroy()
     
-    ; 2. CALCULATION
+    ; 2. DIMENSION CALCULATION
     newWidth := tw + padding
     xPos := (A_ScreenWidth / 2) - (newWidth / 2)
     
     ; 3. UPDATE HUD VALUES
     HUD.BackColor := color
     HUDText.Value := txt
-    HUDText.Opt("+Center")
+    HUDText.Opt("+Center") ; Ensure text is centered within the control
     
-    ; 4. PRECISION POSITIONING
-    ; We set the control height slightly lower than the window (30 vs 35)
-    ; and use y4 to push it down so the font's "baseline" sits in the middle.
-    HUDText.Move(0, 4, newWidth, 30)
+    ; 4. OCD-PRECISION POSITIONING
+    ; y3 and h24 perfectly balance the Bahnschrift font vertically
+    HUDText.Move(0, 3, newWidth, 24)
     
     ; 5. DISPLAY
-    HUD.Show("x" xPos " y0 w" newWidth " h35 NoActivate")
+    ; h28 height for a sleek, minimal notification bar
+    HUD.Show("x" xPos " y0 w" newWidth " h28 NoActivate")
 }
 
 ShowHUD(txt, color) {
@@ -63,7 +61,7 @@ ShowHUD(txt, color) {
 FlashHUD(txt, color) {
     global isFlashing := true 
     UpdateHUD(txt, color)
-    SetTimer(HideFlash, -1000) ; Display for 1 second
+    SetTimer(HideFlash, -1000) 
 }
 
 HideFlash() {
@@ -73,7 +71,7 @@ HideFlash() {
 }
 
 ; ##########################################
-; LAYER 1: NORMAL (Halves & Maximize)
+; LAYER 1: NORMAL
 ; ##########################################
 
 ; Shift + F13: Snap LEFT Half
@@ -179,7 +177,7 @@ $+F21::
 }
 
 ; ##########################################
-; LAYER 2: F23-MODIFIER (Thirds-Splits)
+; LAYER 2: F23-MODIFIER
 ; ##########################################
 
 #HotIf GetKeyState("F23", "P")
