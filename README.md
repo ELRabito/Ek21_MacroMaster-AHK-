@@ -6,7 +6,7 @@ Powerful AutoHotkey script to convert any VIA/QMK programmable Numpad (like the 
 ## 🛠 Setup & Requirements
 
 1. **Install:** [AutoHotkey v2](https://www.autohotkey.com/)
-2. **VIA/QMK Configuration:** Remap your Numpad buttons using the **ANY** feature in VIA with the following keycodes:
+2. **VIA/QMK Configuration:** Remap your Numpad buttons using the **ANY** feature in VIA (https://docs.keeb.io/via) with the following keycodes:
    - `S(KC_F13)` through `S(KC_F21)` for main actions.
    - `KC_F23` and `KC_F24` as layer modifiers.
    - Using Shift + FXX (`S(KC_FXX)`) allows the function keys to be used normally on other layers without interfering.
