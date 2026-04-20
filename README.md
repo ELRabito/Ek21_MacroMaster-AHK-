@@ -15,5 +15,7 @@ Just remap the buttons via the ANY feature of VIA/QMK and insert the keycodes fo
 # Current functions
 <img width="730" height="818" alt="grafik" src="https://github.com/user-attachments/assets/72f8dd19-ecae-40d1-b08e-39eb6507da9f" />
 
+* Window Management: Currently It's designed for 1440p monitors, if you run a different res you need to change some numbers.
+
 # Epomaker EK21 Makropad Example
 <img width="477" height="575" alt="grafik" src="https://github.com/user-attachments/assets/15f53741-a4f1-460f-84cd-67c8659ef35c" />
