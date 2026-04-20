@@ -17,7 +17,7 @@ Powerful AutoHotkey script to convert any VIA/QMK programmable Numpad (like the 
 - **Tri-Layer Logic:** Standard actions + 2 modifier layers (F23/F24).
 - **Smart Window Management:** Left/Right halves & thirds.
 - **App Control:** Context-aware closing, foobar2000 integration, and browser shortcuts.
-<img width="730" height="818" alt="grafik" src="https://github.com/user-attachments/assets/72f8dd19-ecae-40d1-b08e-39eb6507da9f" />
+<img width="863" height="1003" alt="MACROS" src="https://github.com/user-attachments/assets/ff0a27f5-90e6-4db7-95b1-5f367154c757" />
 
 # Epomaker EK21 Makropad Example
 <img width="477" height="575" alt="grafik" src="https://github.com/user-attachments/assets/15f53741-a4f1-460f-84cd-67c8659ef35c" />
