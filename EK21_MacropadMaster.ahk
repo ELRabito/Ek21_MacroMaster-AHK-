@@ -1,26 +1,28 @@
 ; ##########################################
 ; ##########################################
-; MACROPAD MASTER SCRIPT - ULTRA EDITION
+; MACROPAD MASTER SCRIPT - ULTRA EDITION (v2.1)
 ; Modifiers: Shift (via VIA), F23 (Phys.), F24 (Phys.)
 ; ##########################################
 ; ##########################################
 
-; Defines
-global margin := 7
-global taskbarHeight := 40 ; Standard Windows Taskbar
+#Requires AutoHotkey v2.0
 InstallKeybdHook
 SetTitleMatchMode 2
 #UseHook
+
+; --- DEFINES ---
+global margin := 7
+global taskbarHeight := 40 
+global guiWidth := 220
 
 ; --- HUD INIT ---
 HUD := Gui("+AlwaysOnTop -Caption +ToolWindow")
 HUD.SetFont("s10 w700 cWhite", "Segoe UI")
 HUDText := HUD.Add("Text", "Center w220", "")
-guiWidth := 220
 
 ; Modifier HUD
 ShowHUD(txt, color) {
-    xPos := (A_ScreenWidth / 2) - (110) ; Dynamisch zentriert
+    xPos := (A_ScreenWidth / 2) - (guiWidth / 2)
     HUD.BackColor := color
     HUDText.Value := txt
     HUD.Show("x" xPos " y0 w" guiWidth " NoActivate")
@@ -28,7 +30,7 @@ ShowHUD(txt, color) {
 
 ; Feedback HUD
 FlashHUD(txt, color) {
-    xPos := (A_ScreenWidth / 2) - (110)
+    xPos := (A_ScreenWidth / 2) - (guiWidth / 2)
     HUD.BackColor := color
     HUDText.Value := txt
     HUD.Show("x" xPos " y0 w" guiWidth " NoActivate")
@@ -36,15 +38,13 @@ FlashHUD(txt, color) {
 }
 
 ; ##########################################
-; ##########################################
 ; LAYER 1: NORMAL (Halves & Maximize)
-; ##########################################
 ; ##########################################
 
 ; Shift + F13: Snap LEFT Half
 $+F13::
 {
-    halfW := A_ScreenWidth / 2 ; Aktuellen Wert holen
+    halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove -margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: LEFT HALF", "2D2D2D")
@@ -80,36 +80,39 @@ $+F16::
     }
 }
 
-; --- F17: Smart Close ---
+; Shift + F17: Smart Close
 $+F17::
 {
     activeProcess := WinGetProcessName("A")
-	FlashHUD("Closed", "8B0000")
+    FlashHUD("Closed", "8B0000")
     if (activeProcess ~= "i)firefox.exe|notepad\+\+\.exe|chrome.exe")
         Send "^w"
     else if (activeProcess = "Explorer.EXE")
         Send "!{F4}"
     else
-        ;ProcessClose activeProcess
-		WinClose "A"
+        WinClose "A"
 }
 
-; --- F18: Smart foobar2000 ---
+; --- F18: Smart foobar2000
 $+F18::
 {
     FlashHUD("APP: FOOBAR2000", "2E8B57")
-    if WinExist("ahk_exe foobar2000.exe")
+    if WinExist("ahk_exe foobar2000.exe") {
         WinActivate
-    else {
+    } else {
         Run "foobar2000.exe"
         if WinWait("ahk_exe foobar2000.exe", , 2) {
             WinRestore "ahk_exe foobar2000.exe"
-            WinMove (A_ScreenWidth-1600)/2, (A_ScreenHeight-900)/2, 1600, 900, "ahk_exe foobar2000.exe"
+            targetW := A_ScreenWidth * 0.50
+            targetH := A_ScreenHeight * 0.50
+            posX := (A_ScreenWidth - targetW) / 2
+            posY := (A_ScreenHeight - targetH - taskbarHeight) / 2
+            
+            WinMove posX, posY, targetW, targetH, "ahk_exe foobar2000.exe"
         }
     }
 }
-
-; --- F19: Smart Explorer ---
+; Shift + F19: Smart Explorer
 $+F19::
 {
     FlashHUD("APP: EXPLORER", "0078D7")
@@ -119,20 +122,17 @@ $+F19::
         Run "explorer.exe"
 }
 
-; --- F20: Smart Firefox ---
+; Shift + F20: Smart Firefox
 $+F20::
 {
     FlashHUD("APP: FIREFOX", "E66000")
     if WinExist("ahk_exe firefox.exe")
         WinActivate
-    else {
-        KeyWait "F20"
-        Sleep 100
+    else
         Run "firefox.exe"
-    }
 }
 
-; --- F21: Smart Downloads ---
+; Shift + F21: Smart Downloads
 $+F21::
 {
     FlashHUD("FOLDER: DOWNLOADS", "0078D7")
@@ -143,9 +143,7 @@ $+F21::
 }
 
 ; ##########################################
-; ##########################################
 ; LAYER 2: F23-MODIFIER (Thirds-Splits)
-; ##########################################
 ; ##########################################
 
 #HotIf GetKeyState("F23", "P")
@@ -185,7 +183,6 @@ $+F16:: ; Smart Search
     }
 }
 
-
 $+F17:: ; Filter Explorer (Current Window Priority)
 {
     A_Clipboard := ""
@@ -196,13 +193,10 @@ $+F17:: ; Filter Explorer (Current Window Priority)
     {
         WinActivate "ahk_class CabinetWClass"
         if WinWaitActive("ahk_class CabinetWClass", , 1) {
-            Send "{f3}" ; Focus search box
-            Sleep 200   ; Wait for UI to react
-            
-            ; --- CLEAR INPUT FIELD ---
-            Send "^a{BackSpace}" 
+            Send "{f3}"
+            Sleep 200 
+            Send "^a{BackSpace}"
             Sleep 100
-            
             if (A_Clipboard != "") {
                 Send "^v{Enter}"
                 FlashHUD("FILTERING CURRENT WINDOW", "0078D7")
@@ -218,11 +212,8 @@ $+F17:: ; Filter Explorer (Current Window Priority)
             Sleep 300
             Send "{f3}"
             Sleep 100
-            
-            ; --- CLEAR INPUT FIELD ---
             Send "^a{BackSpace}"
             Sleep 50
-            
             if (A_Clipboard != "") {
                 Send "^v{Enter}"
                 FlashHUD("OPEN & FILTER", "0078D7")
@@ -236,19 +227,16 @@ $+F18:: ; Smart YouTube
     FlashHUD("APP: YOUTUBE", "FF0000")
     if WinExist("YouTube")
         WinActivate
-    else {
-        KeyWait "F18"
-        Sleep 100
+    else
         Run "firefox.exe https://www.youtube.com"
-    }
 }
+
+; 3 Keys left
 
 #HotIf
 
 ; ##########################################
-; ##########################################
 ; LAYER 3: F24-MODIFIER
-; ##########################################
 ; ##########################################
 
 #HotIf GetKeyState("F24", "P")
@@ -271,8 +259,7 @@ $+F14:: ; Focus Mode (90% of screen)
     FlashHUD("MODE: FOCUS 90%", "D4A017")
 }
 
-; PiP Toggle (Dynamic Position)
-$+F15::
+$+F15:: ; PiP Toggle
 {
     pipW := A_ScreenWidth * 0.25
     pipH := A_ScreenHeight * 0.25
@@ -328,6 +315,8 @@ $+F18:: ; Copy Current Explorer Path
         FlashHUD("PATH COPIED", "0078D7")
     }
 }
+
+; 3 Keys left
 
 #HotIf
 
