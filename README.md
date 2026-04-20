@@ -12,13 +12,12 @@ Powerful AutoHotkey script to convert any VIA/QMK programmable Numpad (like the 
    - Using Shift + FXX (`S(KC_FXX)`) allows the function keys to be used normally on other layers without interfering.
 <img width="307" height="433" alt="grafik" src="https://github.com/user-attachments/assets/4136e4bb-0435-420a-a2af-eb686ea4613d" />
 
-
 ## 🚀 Key Features
 - **Tri-Layer Logic:** Standard actions + 2 modifier layers (F23/F24).
 - **Smart Window Management:** Left/Right halves & thirds.
 - **App Control:** Context-aware closing, foobar2000 integration, and browser shortcuts.
+- Just make it your own with this examples and adjust it to your likings, most of the work is done...
 <img width="800" height="1122" alt="grafik" src="https://github.com/user-attachments/assets/1b24b2a3-4ebd-4d02-bde8-30bf1a6ecb2f" />
-
 
 
 # Epomaker EK21 Makropad Example
