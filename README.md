@@ -15,7 +15,7 @@ Powerful AutoHotkey script to convert any VIA/QMK programmable Numpad (like the 
 
 ## 🚀 Key Features
 - **Tri-Layer Logic:** Standard actions + 2 modifier layers (F23/F24).
-- **Smart Window Management:** Optimized for 1440p (Left/Right halves & thirds).
+- **Smart Window Management:** Left/Right halves & thirds.
 - **App Control:** Context-aware closing, foobar2000 integration, and browser shortcuts.
 <img width="730" height="818" alt="grafik" src="https://github.com/user-attachments/assets/72f8dd19-ecae-40d1-b08e-39eb6507da9f" />
 
