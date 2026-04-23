@@ -18,10 +18,11 @@ SetTitleMatchMode 2
 
 ; --- HUD INIT ---
 global HUD := Gui("+AlwaysOnTop -Caption +ToolWindow")
-HUD.SetFont("s12 w700 cWhite", "Bahnschrift")
+
+HUD.SetFont("s12 w700 cWhite", "Bahnschrift")  ; 'cWhite' / 'cBlack' 
 global HUDText := HUD.Add("Text", "Center -Wrap", "") 
 global isFlashing := false
-global padding := 60 ; Perfect horizontal balance
+global padding := 60
 
 UpdateHUD(txt, color, tColor := "Black") {
     global HUD, HUDText, padding
@@ -46,6 +47,7 @@ UpdateHUD(txt, color, tColor := "Black") {
     HUDText.Move(0, 3, newWidth, 24)
     
     ; 5. DISPLAY & FORCE TOPMOST
+    ; "NoActivate" verhindert Fokusverlust, "AlwaysOnTop" erzwingt Vordergrund
     HUD.Opt("+AlwaysOnTop") 
     HUD.Show("x" xPos " y0 w" newWidth " h28 NoActivate")
     
@@ -81,14 +83,14 @@ $+F13::
     halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove -margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
-    FlashHUD("SNAP: LEFT HALF", "2D2D2D")
+    FlashHUD("SNAP: LEFT HALF", "00cc33") ; Vibrant Green
 }
 
 ; Shift + F14: Maximize Window
 $+F14::
 {
     WinMaximize "A"
-    FlashHUD("WINDOW: MAXIMIZED", "2D2D2D")
+    FlashHUD("WINDOW: MAXIMIZED", "00cc33")
 }
 
 ; Shift + F15: Snap RIGHT Half
@@ -97,7 +99,7 @@ $+F15::
     halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove halfW - margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
-    FlashHUD("SNAP: RIGHT HALF", "2D2D2D")
+    FlashHUD("SNAP: RIGHT HALF", "00cc33")
 }
 
 ; Shift + F16: Transparency Toggle
@@ -107,10 +109,11 @@ $+F16::
         currentTrans := WinGetTransparent("A")
         newTrans := (currentTrans = 128) ? 255 : 128
         WinSetTransparent newTrans, "A"
-        FlashHUD("GHOST MODE: " . (newTrans = 128 ? "ON" : "OFF"), "4B0082")
+        ; Using a darker purple for better contrast with black text
+        FlashHUD("GHOST MODE: " . (newTrans = 128 ? "ON" : "OFF"), "9966FF")
     } catch {
         WinSetTransparent 128, "A"
-        FlashHUD("GHOST MODE: ON", "4B0082")
+        FlashHUD("GHOST MODE: ON", "9966FF")
     }
 }
 
@@ -147,14 +150,65 @@ $+F18::
     }
 }
 
-; Shift + F19: Smart Explorer
+; Shift + F19: Smart Explorer Tiling (1, 2 or 3 Windows + Bring to Front)
 $+F19::
 {
-    FlashHUD("APP: EXPLORER", "0078D7")
-    if WinExist("ahk_class CabinetWClass")
-        WinActivate
-    else
+    ; 1. Locate all Explorer windows (Class "CabinetWClass")
+    ids := WinGetList("ahk_class CabinetWClass")
+    count := ids.Length
+    
+    if (count == 0) {
+        ; No explorer open -> Open one and show HUD
         Run "explorer.exe"
+        FlashHUD("EXPLORER: START", "00cc33")
+    }
+    else if (count == 1) {
+        ; One open -> Bring existing to front, open second, and tile 50/50
+        WinActivate("ahk_id " ids[1])
+        
+        Run "explorer.exe"
+        if WinWait("ahk_class CabinetWClass", , 2) {
+            Sleep 150
+            newIds := WinGetList("ahk_class CabinetWClass")
+            
+            ; Window 1 -> Left & Front
+            WinRestore("ahk_id " newIds[1])
+            WinMove(-margin, 0, (A_ScreenWidth/2) + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " newIds[1])
+            WinActivate("ahk_id " newIds[1])
+            
+            ; Window 2 -> Right & Front
+            WinRestore("ahk_id " newIds[2])
+            WinMove((A_ScreenWidth/2) - margin, 0, (A_ScreenWidth/2) + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " newIds[2])
+            WinActivate("ahk_id " newIds[2])
+            
+            FlashHUD("EXPLORER: 50/50 SNAP", "00cc33")
+        }
+    }
+    else {
+        ; Two or more open -> Open third (if count was 2) and tile in thirds
+        if (count == 2) {
+            Run "explorer.exe"
+            WinWait("ahk_class CabinetWClass", , 2)
+            Sleep 150
+        }
+        
+        finalIds := WinGetList("ahk_class CabinetWClass")
+        tw := A_ScreenWidth / 3
+        
+        ; Position up to 3 windows side-by-side and bring all to foreground
+        loop Min(finalIds.Length, 3) {
+            currentId := finalIds[A_Index]
+            WinRestore("ahk_id " currentId)
+            
+            ; Calculate X position: 0 for 1st, tw for 2nd, 2*tw for 3rd
+            posX := ((A_Index - 1) * tw) - margin
+            
+            WinMove(posX, 0, tw + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " currentId)
+            WinActivate("ahk_id " currentId)
+        }
+        
+        FlashHUD("EXPLORER: TRIPLE TILE", "00cc33")
+    }
 }
 
 ; Shift + F20: Smart Firefox
@@ -377,4 +431,4 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
     KeyWait "F24"
     if (!isFlashing)
         HUD.Hide()
-}
+} 
