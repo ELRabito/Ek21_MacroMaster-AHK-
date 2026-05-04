@@ -16,37 +16,46 @@ SetTitleMatchMode 2
 ; HUD SYSTEM - OCD PRECISION EDITION (v2.4)
 ; ##########################################
 
-; --- HUD INIT ---
 global HUD := Gui("+AlwaysOnTop -Caption +ToolWindow")
-
 HUD.SetFont("s12 w700 cWhite", "Bahnschrift")
 global HUDText := HUD.Add("Text", "Center -Wrap", "") 
 global isFlashing := false
 global padding := 60
 
+; --- OVERLAY SYSTEM ---
+global Overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
+try {
+    ; Tries to load macros.png from the script folder
+    Overlay.Add("Picture", "w800 h-1", "macros.png") 
+} catch {
+    ; Professional Fallback / Info Text
+    Overlay.BackColor := "1A1A1A"
+    Overlay.SetFont("s18 w700 cWhite", "Bahnschrift")
+    Overlay.Add("Text", "Center w600", "MACRO OVERLAY (PREVIEW)")
+    
+    Overlay.SetFont("s11 w400 cAAAAAA") ; Smaller, gray text for info
+    Overlay.Add("Text", "Center w600", "`nPlace a file named 'macros.png' in your script folder`nto display your custom keymap here.`n")
+    
+    Overlay.SetFont("s12 w600 cWhite") ; White for current layout
+    Overlay.Add("Text", "Center w600", "CURRENT LAYOUT:`nL1: Snap & Explorer`nL2: Thirds & Path`nL3: Size & PiP")
+    
+    ; Add a small bottom margin
+    Overlay.Add("Text", "h10", "") 
+}
+
 UpdateHUD(txt, color, tColor := "Black") {
     global HUD, HUDText, padding
-    
-    ; 1. VIRTUAL MEASUREMENT
     tempGui := Gui()
     tempGui.SetFont("s12 w700", "Bahnschrift")
     tempText := tempGui.Add("Text", "", txt)
     tempText.GetPos(,, &tw)
     tempGui.Destroy()
-    
-    ; 2. CALCULATION
     newWidth := tw + padding
     xPos := (A_ScreenWidth / 2) - (newWidth / 2)
-    
-    ; 3. UPDATE HUD VALUES & COLORS
     HUD.BackColor := color
     HUDText.Opt("c" . tColor . " +Center")
     HUDText.Value := txt
-    
-    ; 4. POSITIONING
     HUDText.Move(0, 3, newWidth, 24)
-    
-    ; 5. DISPLAY & FORCE TOPMOST
     HUD.Opt("+AlwaysOnTop") 
     HUD.Show("x" xPos " y0 w" newWidth " h28 NoActivate")
     WinSetAlwaysOnTop 1, "ahk_id " HUD.Hwnd
@@ -74,34 +83,26 @@ HideFlash() {
 ; LAYER 1: NORMAL
 ; ##########################################
 
-; Shift + F13: Snap LEFT Half
-$+F13::
-{
+$+F13:: {
     halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove -margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: LEFT HALF", "00cc33")
 }
 
-; Shift + F14: Maximize Window
-$+F14::
-{
+$+F14:: {
     WinMaximize "A"
     FlashHUD("WINDOW: MAXIMIZED", "00cc33")
 }
 
-; Shift + F15: Snap RIGHT Half
-$+F15::
-{
+$+F15:: {
     halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove halfW - margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: RIGHT HALF", "00cc33")
 }
 
-; Shift + F16: Transparency Toggle
-$+F16::
-{
+$+F16:: {
     try {
         currentTrans := WinGetTransparent("A")
         newTrans := (currentTrans = 128) ? 255 : 128
@@ -113,9 +114,7 @@ $+F16::
     }
 }
 
-; Shift + F17: Smart Close
-$+F17::
-{
+$+F17:: {
     activeProcess := WinGetProcessName("A")
     FlashHUD("Closed", "8B0000")
     if (activeProcess ~= "i)firefox.exe|notepad\+\+\.exe|chrome.exe")
@@ -126,9 +125,7 @@ $+F17::
         WinClose "A"
 }
 
-; --- F18: Smart foobar2000
-$+F18::
-{
+$+F18:: {
     FlashHUD("APP: FOOBAR2000", "2E8B57")
     if WinExist("ahk_exe foobar2000.exe") {
         WinActivate
@@ -140,76 +137,53 @@ $+F18::
             targetH := A_ScreenHeight * 0.50
             posX := (A_ScreenWidth - targetW) / 2
             posY := (A_ScreenHeight - targetH - taskbarHeight) / 2
-            
             WinMove posX, posY, targetW, targetH, "ahk_exe foobar2000.exe"
         }
     }
 }
 
-; Shift + F19: ; SMART EXPLORER TILING: Opens & Cycles 1, 2, or 3 windows into a perfectly tiled grid.
-$+F19::
-{
-    ; 1. Locate all Explorer windows (Class "CabinetWClass")
+$+F19:: {
     ids := WinGetList("ahk_class CabinetWClass")
     count := ids.Length
-    
     if (count == 0) {
-        ; No explorer open -> Open one and show HUD
         Run "explorer.exe"
         FlashHUD("EXPLORER: START", "00cc33")
     }
     else if (count == 1) {
-        ; One open -> Bring existing to front, open second, and tile 50/50
         WinActivate("ahk_id " ids[1])
-        
         Run "explorer.exe"
         if WinWait("ahk_class CabinetWClass", , 2) {
             Sleep 150
             newIds := WinGetList("ahk_class CabinetWClass")
-            
-            ; Window 1 -> Left & Front
             WinRestore("ahk_id " newIds[1])
             WinMove(-margin, 0, (A_ScreenWidth/2) + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " newIds[1])
             WinActivate("ahk_id " newIds[1])
-            
-            ; Window 2 -> Right & Front
             WinRestore("ahk_id " newIds[2])
             WinMove((A_ScreenWidth/2) - margin, 0, (A_ScreenWidth/2) + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " newIds[2])
             WinActivate("ahk_id " newIds[2])
-            
             FlashHUD("EXPLORER: 50/50 SNAP", "00cc33")
         }
     }
     else {
-        ; Two or more open -> Open third (if count was 2) and tile in thirds
         if (count == 2) {
             Run "explorer.exe"
             WinWait("ahk_class CabinetWClass", , 2)
             Sleep 150
         }
-        
         finalIds := WinGetList("ahk_class CabinetWClass")
         tw := A_ScreenWidth / 3
-        
-        ; Position up to 3 windows side-by-side and bring all to foreground
         loop Min(finalIds.Length, 3) {
             currentId := finalIds[A_Index]
             WinRestore("ahk_id " currentId)
-            
-            ; Calculate X position: 0 for 1st, tw for 2nd, 2*tw for 3rd
             posX := ((A_Index - 1) * tw) - margin
-            
             WinMove(posX, 0, tw + (2*margin), A_ScreenHeight - taskbarHeight, "ahk_id " currentId)
             WinActivate("ahk_id " currentId)
         }
-        
         FlashHUD("EXPLORER: TRIPLE TILE", "00cc33")
     }
 }
 
-; Shift + F20: Smart Search
-$+F20::
-{
+$+F20:: {
     A_Clipboard := ""
     Send "^c"
     if ClipWait(0.25) {
@@ -222,9 +196,7 @@ $+F20::
     }
 }
 
-; Shift + F21: Smart Downloads
-$+F21::
-{
+$+F21:: {
     FlashHUD("FOLDER: DOWNLOADS", "0078D7")
     if WinExist("Downloads ahk_class CabinetWClass")
         WinActivate
@@ -238,38 +210,32 @@ $+F21::
 
 #HotIf GetKeyState("F23", "P")
 
-$+F13:: ; Snap LEFT Third
-{
+$+F13:: {
     thirdW := A_ScreenWidth / 3
     WinRestore "A"
     WinMove -margin, 0, thirdW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: LEFT THIRD", "005A9E")
 }
 
-$+F14:: ; Snap CENTER Third
-{
+$+F14:: {
     thirdW := A_ScreenWidth / 3
     WinRestore "A"
     WinMove thirdW - margin, 0, thirdW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: CENTER THIRD", "005A9E")
 }
 
-$+F15:: ; Snap RIGHT Third
-{
+$+F15:: {
     thirdW := A_ScreenWidth / 3
     WinRestore "A"
     WinMove (2 * thirdW) - margin, 0, thirdW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
     FlashHUD("SNAP: RIGHT THIRD", "005A9E")
 }
 
-$+F16:: ; Filter Explorer (Current Window Priority)
-{
+$+F16:: {
     A_Clipboard := ""
     Send "^c"
     ClipWait(0.5)
-
-    if WinExist("ahk_class CabinetWClass") 
-    {
+    if WinExist("ahk_class CabinetWClass") {
         WinActivate "ahk_class CabinetWClass"
         if WinWaitActive("ahk_class CabinetWClass", , 1) {
             Send "{f3}"
@@ -283,9 +249,7 @@ $+F16:: ; Filter Explorer (Current Window Priority)
                 FlashHUD("SEARCH MODE", "0078D7")
             }
         }
-    } 
-    else 
-    {
+    } else {
         Run "explorer.exe"
         if WinWaitActive("ahk_class CabinetWClass", , 2) {
             Sleep 300
@@ -301,8 +265,7 @@ $+F16:: ; Filter Explorer (Current Window Priority)
     }
 }
 
-$+F17:: ; Smart Explorer - Music
-{
+$+F17:: {
     FlashHUD("FOLDER: MUSIC", "7B904B")
     if WinExist("Musik ahk_class CabinetWClass") || WinExist("Music ahk_class CabinetWClass")
         WinActivate
@@ -310,8 +273,7 @@ $+F17:: ; Smart Explorer - Music
         Run "explorer.exe shell:My Music"
 }
 
-$+F18:: ; Same-App-Hopper
-{
+$+F18:: {
     activeProc := WinGetProcessName("A")
     FlashHUD("HOP: " . activeProc, "D4A017")
     searchTarget := (activeProc = "Explorer.EXE") ? "ahk_class CabinetWClass" : "ahk_exe " activeProc
@@ -329,8 +291,7 @@ $+F18:: ; Same-App-Hopper
     }
 }
 
-$+F19:: ; Copy Current Explorer Path
-{
+$+F19:: {
     if WinActive("ahk_class CabinetWClass") {
         Send "^l"
         Sleep 50
@@ -354,8 +315,7 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
 
 #HotIf GetKeyState("F24", "P")
 
-$+F13:: ; Center Large (75% of screen)
-{
+$+F13:: {
     w := A_ScreenWidth * 0.75
     h := A_ScreenHeight * 0.75
     WinRestore "A"
@@ -363,8 +323,7 @@ $+F13:: ; Center Large (75% of screen)
     FlashHUD("MODE: CENTER 75%", "D4A017")
 }
 
-$+F14:: ; Focus Mode (90% of screen)
-{
+$+F14:: {
     w := A_ScreenWidth * 0.90
     h := A_ScreenHeight * 0.90
     WinRestore "A"
@@ -372,8 +331,7 @@ $+F14:: ; Focus Mode (90% of screen)
     FlashHUD("MODE: FOCUS 90%", "D4A017")
 }
 
-$+F15:: ; PiP Toggle
-{
+$+F15:: {
     pipW := A_ScreenWidth * 0.25
     pipH := A_ScreenHeight * 0.25
     ExStyle := WinGetExStyle("A")
@@ -399,19 +357,36 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
 #HotIf
 
 ; ##########################################
-; HELPERS & MODIFIER HUD
+; HELPERS, OVERLAY & MODIFIER HUD
 ; ##########################################
 
-*F23::
+; COMBO: F23 + F24 -> Macro Overview
+~F23 & F24::
 {
+    Overlay.Show()
+    KeyWait "F23"
+    KeyWait "F24"
+    Overlay.Hide()
+}
+
+~*F23::
+{
+    Sleep 50 
+    if GetKeyState("F24", "P")
+        return
+    
     ShowHUD("LAYER 2", "005A9E")
     KeyWait "F23"
     if (!isFlashing)
         HUD.Hide()
 }
 
-*F24::
+~*F24::
 {
+    Sleep 50
+    if GetKeyState("F23", "P")
+        return
+        
     ShowHUD("LAYER 3", "D4A017")
     KeyWait "F24"
     if (!isFlashing)
