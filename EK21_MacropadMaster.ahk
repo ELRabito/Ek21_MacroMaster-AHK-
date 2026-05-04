@@ -19,7 +19,7 @@ SetTitleMatchMode 2
 ; --- HUD INIT ---
 global HUD := Gui("+AlwaysOnTop -Caption +ToolWindow")
 
-HUD.SetFont("s12 w700 cWhite", "Bahnschrift")  ; 'cWhite' / 'cBlack' 
+HUD.SetFont("s12 w700 cWhite", "Bahnschrift")
 global HUDText := HUD.Add("Text", "Center -Wrap", "") 
 global isFlashing := false
 global padding := 60
@@ -40,18 +40,15 @@ UpdateHUD(txt, color, tColor := "Black") {
     
     ; 3. UPDATE HUD VALUES & COLORS
     HUD.BackColor := color
-    HUDText.Opt("c" . tColor . " +Center") ; Setzt Textfarbe dynamisch
+    HUDText.Opt("c" . tColor . " +Center")
     HUDText.Value := txt
     
     ; 4. POSITIONING
     HUDText.Move(0, 3, newWidth, 24)
     
     ; 5. DISPLAY & FORCE TOPMOST
-    ; "NoActivate" verhindert Fokusverlust, "AlwaysOnTop" erzwingt Vordergrund
     HUD.Opt("+AlwaysOnTop") 
     HUD.Show("x" xPos " y0 w" newWidth " h28 NoActivate")
-    
-    ; Extra-Sicherung: Erzwingt die Ebene über WinSet
     WinSetAlwaysOnTop 1, "ahk_id " HUD.Hwnd
 }
 
@@ -83,7 +80,7 @@ $+F13::
     halfW := A_ScreenWidth / 2
     WinRestore "A"
     WinMove -margin, 0, halfW + (2 * margin), A_ScreenHeight - taskbarHeight, "A"
-    FlashHUD("SNAP: LEFT HALF", "00cc33") ; Vibrant Green
+    FlashHUD("SNAP: LEFT HALF", "00cc33")
 }
 
 ; Shift + F14: Maximize Window
@@ -109,7 +106,6 @@ $+F16::
         currentTrans := WinGetTransparent("A")
         newTrans := (currentTrans = 128) ? 255 : 128
         WinSetTransparent newTrans, "A"
-        ; Using a darker purple for better contrast with black text
         FlashHUD("GHOST MODE: " . (newTrans = 128 ? "ON" : "OFF"), "9966FF")
     } catch {
         WinSetTransparent 128, "A"
@@ -150,7 +146,7 @@ $+F18::
     }
 }
 
-; Shift + F19: Smart Explorer Tiling (1, 2 or 3 Windows + Bring to Front)
+; Shift + F19: ; SMART EXPLORER TILING: Opens & Cycles 1, 2, or 3 windows into a perfectly tiled grid.
 $+F19::
 {
     ; 1. Locate all Explorer windows (Class "CabinetWClass")
@@ -211,14 +207,19 @@ $+F19::
     }
 }
 
-; Shift + F20: Smart Firefox
+; Shift + F20: Smart Search
 $+F20::
 {
-    FlashHUD("APP: FIREFOX", "E66000")
-    if WinExist("ahk_exe firefox.exe")
-        WinActivate
-    else
-        Run "firefox.exe"
+    A_Clipboard := ""
+    Send "^c"
+    if ClipWait(0.25) {
+        searchQuery := StrReplace(A_Clipboard, " ", "+")
+        FlashHUD("SEARCH: GOOGLE", "4285F4")
+        Run "firefox.exe https://www.google.com/search?q=" . searchQuery
+    } 
+    else {
+        FlashHUD("NO SELECTION", "8B0000")
+    }
 }
 
 ; Shift + F21: Smart Downloads
@@ -261,18 +262,7 @@ $+F15:: ; Snap RIGHT Third
     FlashHUD("SNAP: RIGHT THIRD", "005A9E")
 }
 
-$+F16:: ; Smart Search
-{
-    A_Clipboard := ""
-    Send "^c"
-    if ClipWait(1) {
-        searchQuery := StrReplace(A_Clipboard, " ", "+")
-        FlashHUD("SEARCH: GOOGLE", "4285F4")
-        Run "firefox.exe https://www.google.com/search?q=" . searchQuery
-    }
-}
-
-$+F17:: ; Filter Explorer (Current Window Priority)
+$+F16:: ; Filter Explorer (Current Window Priority)
 {
     A_Clipboard := ""
     Send "^c"
@@ -311,16 +301,48 @@ $+F17:: ; Filter Explorer (Current Window Priority)
     }
 }
 
-$+F18:: ; Smart YouTube
+$+F17:: ; Smart Explorer - Music
 {
-    FlashHUD("APP: YOUTUBE", "FF0000")
-    if WinExist("YouTube")
+    FlashHUD("FOLDER: MUSIC", "7B904B")
+    if WinExist("Musik ahk_class CabinetWClass") || WinExist("Music ahk_class CabinetWClass")
         WinActivate
-    else
-        Run "firefox.exe https://www.youtube.com"
+    else 
+        Run "explorer.exe shell:My Music"
 }
 
-$+F19:: FlashHUD("EMPTY", "8B0000")
+$+F18:: ; Same-App-Hopper
+{
+    activeProc := WinGetProcessName("A")
+    FlashHUD("HOP: " . activeProc, "D4A017")
+    searchTarget := (activeProc = "Explorer.EXE") ? "ahk_class CabinetWClass" : "ahk_exe " activeProc
+    ids := WinGetList(searchTarget)
+    if (ids.Length > 1) {
+        WinMoveBottom("A")
+        for id in ids {
+            if (id = ids[1])
+                continue
+            if (WinGetStyle("ahk_id " id) & 0x10000000) {
+                WinActivate("ahk_id " id)
+                break
+            }
+        }
+    }
+}
+
+$+F19:: ; Copy Current Explorer Path
+{
+    if WinActive("ahk_class CabinetWClass") {
+        Send "^l"
+        Sleep 50
+        Send "^c"
+        Sleep 50
+        Send "{Esc}"
+        FlashHUD("PATH COPIED", "0078D7")
+    } else {
+        FlashHUD("NO EXPLORER FOCUSED", "8B0000")
+    }
+}
+
 $+F20:: FlashHUD("EMPTY", "8B0000")
 $+F21:: FlashHUD("EMPTY", "8B0000")
 
@@ -367,46 +389,9 @@ $+F15:: ; PiP Toggle
     }
 }
 
-$+F16:: ; Smart Explorer - Music
-{
-    FlashHUD("FOLDER: MUSIC", "7B904B")
-    if WinExist("Musik ahk_class CabinetWClass") || WinExist("Music ahk_class CabinetWClass")
-        WinActivate
-    else 
-        Run "explorer.exe shell:My Music"
-}
-
-$+F17:: ; Same-App-Hopper
-{
-    activeProc := WinGetProcessName("A")
-    FlashHUD("HOP: " . activeProc, "D4A017")
-    searchTarget := (activeProc = "Explorer.EXE") ? "ahk_class CabinetWClass" : "ahk_exe " activeProc
-    ids := WinGetList(searchTarget)
-    if (ids.Length > 1) {
-        WinMoveBottom("A")
-        for id in ids {
-            if (id = ids[1])
-                continue
-            if (WinGetStyle("ahk_id " id) & 0x10000000) {
-                WinActivate("ahk_id " id)
-                break
-            }
-        }
-    }
-}
-
-$+F18:: ; Copy Current Explorer Path
-{
-    if WinActive("ahk_class CabinetWClass") {
-        Send "^l"
-        Sleep 50
-        Send "^c"
-        Sleep 50
-        Send "{Esc}"
-        FlashHUD("PATH COPIED", "0078D7")
-    }
-}
-
+$+F16:: FlashHUD("EMPTY", "8B0000")
+$+F17:: FlashHUD("EMPTY", "8B0000")
+$+F18:: FlashHUD("EMPTY", "8B0000")
 $+F19:: FlashHUD("EMPTY", "8B0000")
 $+F20:: FlashHUD("EMPTY", "8B0000")
 $+F21:: FlashHUD("EMPTY", "8B0000")
@@ -431,4 +416,4 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
     KeyWait "F24"
     if (!isFlashing)
         HUD.Hide()
-} 
+}
