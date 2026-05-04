@@ -15,8 +15,8 @@ Powerful AutoHotkey script to convert any VIA/QMK programmable Numpad (like the 
 ## 🚀 Key Features
 - **Tri-Layer Logic:** Standard actions + 2 modifier layers (F23/F24).
 - **Smart Window Management:** Left/Right halves & thirds.
-- **HUD:** Real-time, non-intrusive status bars providing instant visual feedback for active layers, window snaps, and executed macros.
-- **Visual Macro Overlay:** Press F23 + F24 for an instant on-screen cheat sheet. It automatically displays your custom macros.png or a helpful fallback guide.
+- **HUD:** Status bars providing instant visual feedback for active layers, window snaps, and executed macros.
+- **Visual Macro Overlay:** Press F23 + F24 for an instant on-screen cheat sheet. It automatically displays your custom macros.png.
 - **App Control:** Context-aware closing, foobar2000 integration, and browser shortcuts.
 - Just make it your own with this examples and adjust it to your likings, most of the work is done...
 <img width="800" height="1123" alt="grafik" src="https://github.com/user-attachments/assets/c78d579b-abfd-43e8-ad68-98ee36e1ea18" />
