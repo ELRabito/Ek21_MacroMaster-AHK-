@@ -25,21 +25,18 @@ global padding := 60
 ; --- OVERLAY SYSTEM ---
 global Overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
 try {
-    ; Tries to load macros.png from the script folder
     Overlay.Add("Picture", "w800 h-1", "macros.png") 
 } catch {
-    ; Professional Fallback / Info Text
     Overlay.BackColor := "1A1A1A"
     Overlay.SetFont("s18 w700 cWhite", "Bahnschrift")
     Overlay.Add("Text", "Center w600", "MACRO OVERLAY (PREVIEW)")
     
-    Overlay.SetFont("s11 w400 cAAAAAA") ; Smaller, gray text for info
+    Overlay.SetFont("s11 w400 cAAAAAA")
     Overlay.Add("Text", "Center w600", "`nPlace a file named 'macros.png' in your script folder`nto display your custom keymap here.`n")
     
-    Overlay.SetFont("s12 w600 cWhite") ; White for current layout
+    Overlay.SetFont("s12 w600 cWhite")
     Overlay.Add("Text", "Center w600", "CURRENT LAYOUT:`nL1: Snap & Explorer`nL2: Thirds & Path`nL3: Size & PiP")
     
-    ; Add a small bottom margin
     Overlay.Add("Text", "h10", "") 
 }
 
@@ -357,21 +354,25 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
 #HotIf
 
 ; ##########################################
-; HELPERS, OVERLAY & MODIFIER HUD
+; HELPERS & MODIFIER
 ; ##########################################
 
 ; COMBO: F23 + F24 -> Macro Overview
 ~F23 & F24::
 {
+    UpdateHUD("CHEATSHEET", "00CC33") 
     Overlay.Show()
     KeyWait "F23"
     KeyWait "F24"
     Overlay.Hide()
+    HUD.Hide()
 }
 
+
+; Modifier 1 (Layer 2)
 ~*F23::
 {
-    Sleep 50 
+    Sleep 70 
     if GetKeyState("F24", "P")
         return
     
@@ -381,9 +382,10 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
         HUD.Hide()
 }
 
+; Modifier 2 (Layer 3)
 ~*F24::
 {
-    Sleep 50
+    Sleep 70
     if GetKeyState("F23", "P")
         return
         
