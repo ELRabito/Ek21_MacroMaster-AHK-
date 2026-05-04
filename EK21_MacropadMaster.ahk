@@ -25,18 +25,15 @@ global padding := 60
 ; --- OVERLAY SYSTEM ---
 global Overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
 try {
-    Overlay.Add("Picture", "w800 h-1", "macros.png") 
+    Overlay.Add("Picture", "w800 h-1", "Macro_Cheatsheet.png") 
 } catch {
     Overlay.BackColor := "1A1A1A"
     Overlay.SetFont("s18 w700 cWhite", "Bahnschrift")
-    Overlay.Add("Text", "Center w600", "MACRO OVERLAY (PREVIEW)")
+    Overlay.Add("Text", "Center w600", "Macro_Cheatsheet.png missing!")
     
     Overlay.SetFont("s11 w400 cAAAAAA")
-    Overlay.Add("Text", "Center w600", "`nPlace a file named 'macros.png' in your script folder`nto display your custom keymap here.`n")
-    
-    Overlay.SetFont("s12 w600 cWhite")
-    Overlay.Add("Text", "Center w600", "CURRENT LAYOUT:`nL1: Snap & Explorer`nL2: Thirds & Path`nL3: Size & PiP")
-    
+    Overlay.Add("Text", "Center w600", "`nPlace a file named 'Macro_Cheatsheet.png' in your Autohotkey script/compiled exe folder`nto display your custom keymap here.`n")
+
     Overlay.Add("Text", "h10", "") 
 }
 
@@ -362,12 +359,14 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
 {
     UpdateHUD("CHEATSHEET", "00CC33") 
     Overlay.Show()
-    KeyWait "F23"
-    KeyWait "F24"
+    while (GetKeyState("F23", "P") && GetKeyState("F24", "P"))
+    {
+        Sleep 20
+    }
+    
     Overlay.Hide()
     HUD.Hide()
 }
-
 
 ; Modifier 1 (Layer 2)
 ~*F23::
