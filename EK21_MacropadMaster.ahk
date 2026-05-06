@@ -1,6 +1,6 @@
 ; ##########################################
 ; ##########################################
-; MACROPAD MASTER SCRIPT - ULTRA EDITION (v2.3)
+; MACROPAD MASTER SCRIPT - ULTRA EDITION (v2.4)
 ; Modifiers: Shift (via VIA), F23 (Phys.), F24 (Phys.)
 ; ##########################################
 ; ##########################################
@@ -21,21 +21,7 @@ HUD.SetFont("s12 w700 cWhite", "Bahnschrift")
 global HUDText := HUD.Add("Text", "Center -Wrap", "") 
 global isFlashing := false
 global padding := 60
-
-; --- OVERLAY SYSTEM ---
-global Overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
-try {
-    Overlay.Add("Picture", "w800 h-1", "Macro_Cheatsheet.png") 
-} catch {
-    Overlay.BackColor := "1A1A1A"
-    Overlay.SetFont("s18 w700 cWhite", "Bahnschrift")
-    Overlay.Add("Text", "Center w600", "Macro_Cheatsheet.png missing!")
-    
-    Overlay.SetFont("s11 w400 cAAAAAA")
-    Overlay.Add("Text", "Center w600", "`nPlace a file named 'Macro_Cheatsheet.png' in your Autohotkey script/compiled exe folder`nto display your custom keymap here.`n")
-
-    Overlay.Add("Text", "h10", "") 
-}
+global Overlay := 0
 
 UpdateHUD(txt, color, tColor := "Black") {
     global HUD, HUDText, padding
@@ -357,8 +343,25 @@ $+F21:: FlashHUD("EMPTY", "8B0000")
 ; COMBO: F23 + F24 -> Macro Overview
 ~F23 & F24::
 {
+    global Overlay
+    if (Overlay = 0) {
+        Overlay := Gui("+AlwaysOnTop -Caption +ToolWindow")
+        try {
+            Overlay.Add("Picture", "w800 h-1", "Macro_Cheatsheet.png") 
+        } catch {
+            Overlay.BackColor := "1A1A1A"
+            Overlay.SetFont("s18 w700 cWhite", "Bahnschrift")
+            Overlay.Add("Text", "Center w600", "Macro_Cheatsheet.png missing!")
+            
+            Overlay.SetFont("s11 w400 cAAAAAA")
+            Overlay.Add("Text", "Center w600", "`nPlace a file named 'Macro_Cheatsheet.png' in your script folder.`n")
+            Overlay.Add("Text", "h10", "") 
+        }
+    }
+
     UpdateHUD("CHEATSHEET", "00CC33") 
     Overlay.Show()
+    
     while (GetKeyState("F23", "P") && GetKeyState("F24", "P"))
     {
         Sleep 20
