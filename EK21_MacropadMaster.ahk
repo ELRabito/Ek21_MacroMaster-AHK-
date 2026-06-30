@@ -117,8 +117,9 @@ $+F18:: {
         WinActivate
     } else {
         Run "foobar2000.exe"
-        if WinWait("ahk_exe foobar2000.exe", , 2) {
-            WinRestore "ahk_exe foobar2000.exe"
+        if WinWaitActive("ahk_exe foobar2000.exe", , 3) {
+		
+            Sleep 100
             targetW := A_ScreenWidth * 0.50
             targetH := A_ScreenHeight * 0.50
             posX := (A_ScreenWidth - targetW) / 2
